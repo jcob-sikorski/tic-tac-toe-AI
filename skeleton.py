@@ -1,7 +1,8 @@
 '''SKELETON FOR TIC TAC TOE AI'''
 from pandas import DataFrame
+from random import choice
 
-#https://robertheaton.com/2018/10/09/programming-projects-for-advanced-beginners-3-a/
+#https://robertheaton.com/2018/10/09/programming-projects-for-advanced-beginners-3-b/
 
 def new_board():
     '''Creates 3x3 matrix (so-called board) to play with.'''
@@ -24,13 +25,40 @@ def is_valid_move(board, coordinates):
     else:
         return False
 
+def empty_squares(board):
+    '''Finds every empty square in the given board.'''
+    empty_squares = []
+    
+    for ri, row in enumerate(board):
+        for ei, elem in enumerate(row):
+            if board[ri][ei] == '-':
+                empty_squares.append((ei, ri))
+            else:
+                pass
+    if len(empty_squares) != 0:
+        return empty_squares
+    else:
+        return None
+
+
+def random_ai(board):
+    choosed_square = choice(empty_squares(board))
+    return choosed_square
+
 
 def make_move(board, player):
     '''Put a pawn on a specific square specified by coordinates.'''
     print(f'PLAYER: {player}')
-    coordinates = input('x y: ').split(' ')
+
+    if player == 'X':
+        coordinates = random_ai(board)
+        #coordinates = input('x y: ').split(' ')
+    else:
+        coordinates = random_ai(board)
+
     x = int(coordinates[0])
     y = int(coordinates[1])
+
     if is_valid_move(board, (x, y)):
         print(f"Can't make move {(x, y)} square is already taken!")
         make_move(board, player)
@@ -94,20 +122,22 @@ def check_winner(board):
             return X
         else:
             return None
-
-        
-def update_board():
-    '''Update board after new move.'''
+    
 
 def game(board, player):
+    '''The core of the game.'''
+
     board = make_move(board, player)
     render(board)
+
     print('-----------')
     if player == 'X':
         player = 'O'
     else:
         player = 'X'
+
     winner = check_winner(board)
+
     if winner == 'DRAW':
         return None
     elif winner != None:
@@ -115,7 +145,10 @@ def game(board, player):
         return winner
 
     board = rotate90Clockwise(rotate90Clockwise(board))
+
     return game(board, player)
+
+# 2. AI that makes winning moves
 
 board = new_board()
 render(board)
