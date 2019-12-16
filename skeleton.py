@@ -110,7 +110,7 @@ def check_win(board):
         count += 1
 
     diagonal1 = [r_board[0][0], r_board[1][1], r_board[2][2]]
-    diagonal2 = [r_board[0][2], r_board[1][1], r_board[2][0]]
+    diagonal2 = [r_board[0][2], r_board[1][1], r_board[2][0]] 
     # checks if settling move wasn't done in diagonals
     if diagonal1.count(O) == 3 or diagonal2.count(O) == 3:
         return O
@@ -121,6 +121,29 @@ def check_win(board):
         return 'DRAW'
     else:
         return None
+
+def iq_ai(board, player):
+    r_board = rotate90Clockwise(board)
+    ai = player
+    if ai == 'X':
+        opponent = 'O'
+    else:
+        opponent = 'X'
+
+    for row in board:
+        if row.count(ai) == 2:
+            for i in row:
+                if i == '-':
+                    board[row][i] = ai
+                    return board
+
+    diagonal1 = [r_board[0][0], r_board[1][1], r_board[2][2]]
+    diagonal2 = [r_board[0][2], r_board[1][1], r_board[2][0]]
+    if diagonal1.count(ai) == 2:
+        for ei, elem in enumerate(diagonal1):
+            if elem == '-':
+                # BOARD[ei][ri] == element from this diagonal but how?
+                pass
     
 
 def game(board, player):
