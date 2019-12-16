@@ -92,8 +92,7 @@ def board_is_full(board):
     else:
         return False
 
-def check_winner(board):
-    if board_is_full(board):
+def check_win(board):
         X = 'X'
         O = 'O'
         count = 0
@@ -116,35 +115,23 @@ def check_winner(board):
             return O
         elif diagonal1.count(X) == 3 or diagonal2.count(X) == 3:
             return X
-        else:
+        elif board_is_full(board):
             print('---DRAW---')
             return 'DRAW'
-    else:
-
-        X = 'X'
-        O = 'O'
-        count = 0
-        while count != 2:
-            r_board = rotate90Clockwise(board)
-            for i in r_board:
-                if i.count(O) == 3:
-                    return O
-                elif i.count(X) == 3:
-                    return X
-                else:
-                    pass
-            count += 1
-
-        diagonal1 = [r_board[0][0], r_board[1][1], r_board[2][2]]
-        diagonal2 = [r_board[0][2], r_board[1][1], r_board[2][0]]
-
-        # checks if settling move wasn't done in diagonals
-        if diagonal1.count(O) == 3 or diagonal2.count(O) == 3:
-            return O
-        elif diagonal1.count(X) == 3 or diagonal2.count(X) == 3:
-            return X
         else:
             return None
+
+def check_winner(board):
+    if board_is_full(board):
+        if True:
+            return check_win(board)
+        #else:
+        #    print('---DRAW---')
+        #    return 'DRAW'
+    else:
+        return check_win(board)
+        #else:
+        #    return None
     
 
 def game(board, player):
