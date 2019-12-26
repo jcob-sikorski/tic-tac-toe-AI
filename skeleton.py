@@ -5,7 +5,7 @@ from random import choice
 #https://robertheaton.com/2018/10/09/programming-projects-for-advanced-beginners-3-b/
 
 def new_board():
-    '''Creates 3x3 matrix (so-called board) to play with.'''
+    '''Creates 3x3 board (so-called board) to play with.'''
     board = [['-' for row in range(3)] for rows in range(3)]
     return board
 
@@ -15,15 +15,17 @@ def render(board):
     print(DataFrame(board))
 
 
-def is_valid_move(board, coordinates):
+def is_invalid_move(board, coordinates):
     '''Checks if the square isn't already taken.'''
     x = coordinates[0]
     y = coordinates[1]
+    print((x, y))
 
     if board[y][x] != '-':
         return True
     else:
         return False
+
 
 def empty_squares(board):
     '''Finds every empty square in the given board.'''
@@ -41,34 +43,9 @@ def empty_squares(board):
         return None
 
 
-def random_ai(board):
-    choosed_square = choice(empty_squares(board))
-    return choosed_square
-
-
-def make_move(board, player):
-    '''Put a pawn on a specific square specified by coordinates.'''
-    print(f'PLAYER: {player}')
-
-    if player == 'X':
-        coordinates = random_ai(board)
-        #coordinates = input('x y: ').split(' ')
-    else:
-        coordinates = random_ai(board)
-
-    x = int(coordinates[0])
-    y = int(coordinates[1])
-
-    if is_valid_move(board, (x, y)):
-        print(f"Can't make move {(x, y)} square is already taken!")
-        make_move(board, player)
-    else:
-        board[y][x] = player
-    return board
-
-
 def rotate90Clockwise(board):
-    '''Rotates matrix by 90 degrees clockwise.'''
+    '''Rotates board by 90 degrees clockwise.'''
+    board = board
     row = len(board[0]) 
     for i in range(row // 2): 
         for j in range(i, row - i - 1): 
@@ -78,6 +55,110 @@ def rotate90Clockwise(board):
             board[row - 1 - i][row - 1 - j] = board[j][row - 1 - i] 
             board[j][row - 1 - i] = temp
 
+    return board
+
+
+def rotate90AntiClockwise(board):
+    N = len(board[0])
+    # Consider all squares one by one 
+    for x in range(0, int(N/2)): 
+          
+        # Consider elements in group    
+        # of 4 in current square 
+        for y in range(x, N-x-1): 
+              
+            # store current cell in temp variable 
+            temp = board[x][y] 
+  
+            # move values from right to top 
+            board[x][y] = board[y][N-1-x] 
+  
+            # move values from bottom to right 
+            board[y][N-1-x] = board[N-1-x][N-1-y] 
+  
+            # move values from left to bottom 
+            board[N-1-x][N-1-y] = board[N-1-y][x] 
+  
+            # assign temp to left 
+            board[N-1-y][x] = temp 
+
+    return board
+
+
+def random_ai(board):
+    choosed_square = choice(empty_squares(board))
+    return choosed_square
+
+def finds_winning_move_ai(board, player):
+    opponent = None
+    if player == 'X':
+        opponent = 'O'
+    else:
+        opponent = 'X'
+    # checks if settling move haven't been done in horizontal rows
+    for ri, row in enumerate(board):
+        if row.count(player) == 2 and row.count(opponent) == 0:
+            for ei, elem in enumerate(row):
+                if board[ri][ei] == '-':
+                    return (ei, ri)
+
+    board_length = len(board[0])
+    print(len(board[0]))
+    # checks if settling move haven't been done in vertical rows
+    for ri, row in enumerate(board):
+        if row.count(player) == 2 and row.count(opponent) == 0:
+            for ei, elem in enumerate(row):
+                if board[ri][ei] == '-':
+                    rotate90AntiClockwise(board)
+                    if ei == 0 and ri == 0:
+                        return (2, 0)
+                    else:
+                        return (ri, board_length -1 - ei)
+
+
+    diagonal1 = [board[0][0], board[1][1], board[2][2]]
+
+    if diagonal1.count(player) == 2 and diagonal1.count(opponent) == 0:
+        for ei, elem in enumerate(diagonal1):
+            if ei == 0 and elem == '-':
+                return (0, 0)
+            elif ei == 1 and elem == '-':
+                return (1, 1)
+            elif ei == 2 and elem == '-':
+                return (2, 2)
+
+    diagonal2 = [board[0][2], board[1][1], board[2][0]]
+
+    if diagonal2.count(player) == 2 and diagonal2.count(opponent) == 0:       
+        for ei, elem in enumerate(diagonal2):
+            if ei == 0 and elem == '-':
+                return (2, 0)
+            elif ei == 1 and elem == '-':
+                return (1, 1)
+            elif ei == 2 and elem == '-':
+                return (0, 2)
+    return random_ai(board)
+
+
+def make_move(board, player):
+    '''Put a pawn on a specific square specified by coordinates.'''
+    print(f'PLAYER: {player}')
+
+    if player == 'X':
+        coordinates = finds_winning_move_ai(board, 'X')
+        #coordinates = input('x y: ').split(' ')
+    else:
+        coordinates = random_ai(board)
+
+    x = int(coordinates[0])
+    y = int(coordinates[1])
+
+    if is_invalid_move(board, (x, y)):
+        print(f"Can't make move {(x, y)} square is already taken!")
+        #rotate90AntiClockwise(board)
+        make_move(board, player)
+    else:
+        board[y][x] = player
     return board
 
 def board_is_full(board):
@@ -121,29 +202,6 @@ def check_win(board):
         return 'DRAW'
     else:
         return None
-
-def iq_ai(board, player):
-    r_board = rotate90Clockwise(board)
-    ai = player
-    if ai == 'X':
-        opponent = 'O'
-    else:
-        opponent = 'X'
-
-    for row in board:
-        if row.count(ai) == 2:
-            for i in row:
-                if i == '-':
-                    board[row][i] = ai
-                    return board
-
-    diagonal1 = [r_board[0][0], r_board[1][1], r_board[2][2]]
-    diagonal2 = [r_board[0][2], r_board[1][1], r_board[2][0]]
-    if diagonal1.count(ai) == 2:
-        for ei, elem in enumerate(diagonal1):
-            if elem == '-':
-                # BOARD[ei][ri] == element from this diagonal but how?
-                pass
     
 
 def game(board, player):
