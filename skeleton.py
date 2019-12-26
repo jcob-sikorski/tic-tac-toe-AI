@@ -59,6 +59,7 @@ def rotate90Clockwise(board):
 
 
 def rotate90AntiClockwise(board):
+    '''Rotates matrix by 90 degrees anti clockwise.'''
     N = len(board[0])
     # Consider all squares one by one 
     for x in range(0, int(N/2)): 
@@ -86,10 +87,64 @@ def rotate90AntiClockwise(board):
 
 
 def random_ai(board):
+    '''Randomly chooses not owned square on board.'''
     choosed_square = choice(empty_squares(board))
     return choosed_square
 
-def finds_winning_move_ai(board, player):
+def find_opp_win(board, opponent):
+    '''Rudimentary AI choosing last settling move, if such moves aren't possible, chooses randomly.'''
+    player = None
+    if opponent == 'X':
+        player = 'O'
+    else:
+        player = 'X'
+    # checks if settling move haven't been done in horizontal rows
+    for ri, row in enumerate(board):
+        if row.count(opponent) == 2 and row.count(player) == 0:
+            for ei, elem in enumerate(row):
+                if board[ri][ei] == '-':
+                    return (ei, ri)
+
+    board_length = len(board[0])
+    print(len(board[0]))
+    # checks if settling move haven't been done in vertical rows
+    for ri, row in enumerate(board):
+        if row.count(opponent) == 2 and row.count(player) == 0:
+            for ei, elem in enumerate(row):
+                if board[ri][ei] == '-':
+                    rotate90AntiClockwise(board)
+                    if ei == 0 and ri == 0:
+                        return (2, 0)
+                    else:
+                        return (ri, board_length -1 - ei)
+
+    # diagonal from top left to bottom right
+    diagonal1 = [board[0][0], board[1][1], board[2][2]]
+
+    if diagonal1.count(opponent) == 2 and diagonal1.count(player) == 0:
+        for ei, elem in enumerate(diagonal1):
+            if ei == 0 and elem == '-':
+                return (0, 0)
+            elif ei == 1 and elem == '-':
+                return (1, 1)
+            elif ei == 2 and elem == '-':
+                return (2, 2)
+
+    # diagonal from top right to bottom left
+    diagonal2 = [board[0][2], board[1][1], board[2][0]]
+
+    if diagonal2.count(opponent) == 2 and diagonal2.count(player) == 0:
+        for ei, elem in enumerate(diagonal2):
+            if ei == 0 and elem == '-':
+                return (2, 0)
+            elif ei == 1 and elem == '-':
+                return (1, 1)
+            elif ei == 2 and elem == '-':
+                return (0, 2)   
+    return None 
+
+def finds_winning_move_and_blocks_win_ai(board, player):
+    '''Rudimentary AI choosing last settling move, if such moves aren't possible, chooses randomly.'''
     opponent = None
     if player == 'X':
         opponent = 'O'
@@ -100,6 +155,8 @@ def finds_winning_move_ai(board, player):
         if row.count(player) == 2 and row.count(opponent) == 0:
             for ei, elem in enumerate(row):
                 if board[ri][ei] == '-':
+                    ####################
+                    print('111111111111111111', (ei, ri))
                     return (ei, ri)
 
     board_length = len(board[0])
@@ -107,48 +164,71 @@ def finds_winning_move_ai(board, player):
     # checks if settling move haven't been done in vertical rows
     for ri, row in enumerate(board):
         if row.count(player) == 2 and row.count(opponent) == 0:
+            print('row: ', row)
             for ei, elem in enumerate(row):
+                print('ei: ', ei)
                 if board[ri][ei] == '-':
                     rotate90AntiClockwise(board)
                     if ei == 0 and ri == 0:
                         return (2, 0)
                     else:
+                        print('222222222222', (ri, board_length-1-ei))
+                        render(board)
                         return (ri, board_length -1 - ei)
 
-
+    # diagonal from top left to bottom right
     diagonal1 = [board[0][0], board[1][1], board[2][2]]
 
     if diagonal1.count(player) == 2 and diagonal1.count(opponent) == 0:
+        print(f'diagonal1:   {diagonal1}')
         for ei, elem in enumerate(diagonal1):
+            print(ei, elem)
             if ei == 0 and elem == '-':
+                print('333333333333')
                 return (0, 0)
             elif ei == 1 and elem == '-':
+                print('444444444444')
                 return (1, 1)
             elif ei == 2 and elem == '-':
+                print('555555555555')
                 return (2, 2)
 
+    # diagonal from top right to bottom left
     diagonal2 = [board[0][2], board[1][1], board[2][0]]
 
-    if diagonal2.count(player) == 2 and diagonal2.count(opponent) == 0:       
+    if diagonal2.count(player) == 2 and diagonal2.count(opponent) == 0:
+        print(f'diagonal2:   {diagonal2}')
         for ei, elem in enumerate(diagonal2):
+            print(ei, elem)
             if ei == 0 and elem == '-':
+                print('6666666666')
                 return (2, 0)
             elif ei == 1 and elem == '-':
+                print('7777777777')
+                print(elem)
                 return (1, 1)
             elif ei == 2 and elem == '-':
+                print('88888888888')
+                print(elem)
                 return (0, 2)
-    return random_ai(board)
+    # if AI didn't notice any settling move, chooses random move
+        print('999999999999')
+    if find_opp_win(board, opponent) != None:
+        print('TENNNNNNNNNNNNNN')
+        return find_opp_win(board, opponent)
+    else:    
+        return random_ai(board)
 
 
 def make_move(board, player):
-    '''Put a pawn on a specific square specified by coordinates.'''
+    '''Puts a pawn on a specific square specified by coordinates.'''
     print(f'PLAYER: {player}')
 
     if player == 'X':
-        coordinates = finds_winning_move_ai(board, 'X')
+        coordinates = finds_winning_move_and_blocks_win_ai(board, 'X')
         #coordinates = input('x y: ').split(' ')
     else:
-        coordinates = random_ai(board)
+        coordinates = finds_winning_move_and_blocks_win_ai(board, 'O')
 
     x = int(coordinates[0])
     y = int(coordinates[1])
@@ -162,7 +242,7 @@ def make_move(board, player):
     return board
 
 def board_is_full(board):
-    '''Check if the board is filled. Return True or False.'''
+    '''Checks if the board is filled. Returns True or False.'''
     counter = 0
     # count filled rows
     for i in board:
@@ -174,10 +254,11 @@ def board_is_full(board):
         return False
 
 def check_win(board):
-    '''Checks if recent move isn't a winning move. if it was returns player. If board is full, returns 'DRAW'. Eventually None.'''
+    '''Checks if recent move isn't a winning move. If it was returns player. If board is full, returns 'DRAW'. Eventually None.'''
     X = 'X'
     O = 'O'
     count = 0
+    # automatically rotates a board to check if settling move wasn't done somewhere in the rows
     while count != 2:
         r_board = rotate90Clockwise(board)
         for i in r_board:
@@ -190,8 +271,12 @@ def check_win(board):
 
         count += 1
 
+    # diagonal from top left to bottom right
     diagonal1 = [r_board[0][0], r_board[1][1], r_board[2][2]]
-    diagonal2 = [r_board[0][2], r_board[1][1], r_board[2][0]] 
+
+    # diagonal from top right to bottom left
+    diagonal2 = [r_board[0][2], r_board[1][1], r_board[2][0]]
+
     # checks if settling move wasn't done in diagonals
     if diagonal1.count(O) == 3 or diagonal2.count(O) == 3:
         return O
@@ -227,8 +312,6 @@ def game(board, player):
     board = rotate90Clockwise(rotate90Clockwise(board))
 
     return game(board, player)
-
-# 2. AI that makes winning moves
 
 board = new_board()
 render(board)
