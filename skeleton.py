@@ -1,8 +1,6 @@
-'''SKELETON FOR TIC TAC TOE AI'''
 from pandas import DataFrame
 from random import choice
 
-#https://robertheaton.com/2018/10/09/programming-projects-for-advanced-beginners-3-b/
 
 def new_board():
     '''Creates 3x3 board (so-called board) to play with.'''
@@ -19,7 +17,7 @@ def is_invalid_move(board, coordinates):
     '''Checks if the square isn't already taken.'''
     x = coordinates[0]
     y = coordinates[1]
-    print((x, y))
+    #print((x, y))
 
     if board[y][x] != '-':
         return True
@@ -106,7 +104,7 @@ def find_opp_win(board, opponent):
                     return (ei, ri)
 
     board_length = len(board[0])
-    print(len(board[0]))
+
     # checks if settling move haven't been done in vertical rows
     for ri, row in enumerate(board):
         if row.count(opponent) == 2 and row.count(player) == 0:
@@ -155,91 +153,65 @@ def finds_winning_move_and_blocks_win_ai(board, player):
         if row.count(player) == 2 and row.count(opponent) == 0:
             for ei, elem in enumerate(row):
                 if board[ri][ei] == '-':
-                    ####################
-                    print('111111111111111111', (ei, ri))
+
                     return (ei, ri)
 
     board_length = len(board[0])
-    print(len(board[0]))
+
     # checks if settling move haven't been done in vertical rows
     for ri, row in enumerate(board):
         if row.count(player) == 2 and row.count(opponent) == 0:
-            print('row: ', row)
+
             for ei, elem in enumerate(row):
-                print('ei: ', ei)
+
                 if board[ri][ei] == '-':
                     rotate90AntiClockwise(board)
                     if ei == 0 and ri == 0:
                         return (2, 0)
                     else:
-                        print('222222222222', (ri, board_length-1-ei))
-                        render(board)
+
                         return (ri, board_length -1 - ei)
 
     # diagonal from top left to bottom right
     diagonal1 = [board[0][0], board[1][1], board[2][2]]
 
     if diagonal1.count(player) == 2 and diagonal1.count(opponent) == 0:
-        print(f'diagonal1:   {diagonal1}')
+
         for ei, elem in enumerate(diagonal1):
-            print(ei, elem)
+
             if ei == 0 and elem == '-':
-                print('333333333333')
+
                 return (0, 0)
             elif ei == 1 and elem == '-':
-                print('444444444444')
+
                 return (1, 1)
             elif ei == 2 and elem == '-':
-                print('555555555555')
+
                 return (2, 2)
 
     # diagonal from top right to bottom left
     diagonal2 = [board[0][2], board[1][1], board[2][0]]
 
     if diagonal2.count(player) == 2 and diagonal2.count(opponent) == 0:
-        print(f'diagonal2:   {diagonal2}')
+
         for ei, elem in enumerate(diagonal2):
-            print(ei, elem)
+
             if ei == 0 and elem == '-':
-                print('6666666666')
+
                 return (2, 0)
             elif ei == 1 and elem == '-':
-                print('7777777777')
-                print(elem)
+
                 return (1, 1)
             elif ei == 2 and elem == '-':
-                print('88888888888')
-                print(elem)
+
                 return (0, 2)
     # if AI didn't notice any settling move, chooses random move
-        print('999999999999')
+
     if find_opp_win(board, opponent) != None:
-        print('TENNNNNNNNNNNNNN')
+
         return find_opp_win(board, opponent)
     else:    
         return random_ai(board)
-
-
-def make_move(board, player):
-    '''Puts a pawn on a specific square specified by coordinates.'''
-    print(f'PLAYER: {player}')
-
-    if player == 'X':
-        coordinates = finds_winning_move_and_blocks_win_ai(board, 'X')
-        #coordinates = input('x y: ').split(' ')
-    else:
-        coordinates = finds_winning_move_and_blocks_win_ai(board, 'O')
-
-    x = int(coordinates[0])
-    y = int(coordinates[1])
-
-    if is_invalid_move(board, (x, y)):
-        print(f"Can't make move {(x, y)} square is already taken!")
-        #rotate90AntiClockwise(board)
-        make_move(board, player)
-    else:
-        board[y][x] = player
-    return board
 
 def board_is_full(board):
     '''Checks if the board is filled. Returns True or False.'''
@@ -283,11 +255,30 @@ def check_win(board):
     elif diagonal1.count(X) == 3 or diagonal2.count(X) == 3:
         return X
     elif board_is_full(board):
-        print('---DRAW---')
         return 'DRAW'
     else:
         return None
-    
+
+def make_move(board, player):
+    '''Puts a pawn on a specific square specified by coordinates.'''
+
+    if player == 'X':
+        # HERE YOU CAN CHANGE TYPE OF PLAYER
+        coordinates = finds_winning_move_and_blocks_win_ai(board, 'X') 
+    else:
+        # HERE AN OPPONENT
+        coordinates = input('x y: ').split(' ')
+
+    x = int(coordinates[0])
+    y = int(coordinates[1])
+
+    if is_invalid_move(board, (x, y)):
+        print(f"Can't make move {(x, y)} square is already taken!")
+        make_move(board, player)
+    else:
+        board[y][x] = player
+    return board
+
 
 def game(board, player):
     '''The core of the game.'''
@@ -295,7 +286,7 @@ def game(board, player):
     board = make_move(board, player)
     render(board)
 
-    print('-----------')
+    print('------------')
     if player == 'X':
         player = 'O'
     else:
@@ -304,14 +295,36 @@ def game(board, player):
     winner = check_win(board)
 
     if winner == 'DRAW':
-        return None
+        return 'DRAW'
     elif winner != None:
-        print(f'The winner is: {winner}!')
+
+        print(winner)
         return winner
 
     board = rotate90Clockwise(rotate90Clockwise(board))
 
     return game(board, player)
+
+def play_lab(n):
+    '''Plays n games and returns statistics about number of wins and draws.'''
+    results = []
+    for _ in range(n):
+        board = new_board()
+        #render(board)
+        result = game(board, 'X')
+
+        if result == 'X':
+            results.append(1)
+        elif result == 'O':
+            results.append(2)
+        else:
+            results.append(3)
+    stats = {}
+    stats['X'] = results.count(1)
+    stats['O'] = results.count(2)
+    stats['DRAW'] = results.count(3)
+    print(f'THE FINAL STATS ARE: {stats}')
+    return stats
 
 board = new_board()
 render(board)
